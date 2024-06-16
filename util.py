@@ -1,27 +1,15 @@
-from enum import Enum
-
 import pandas as pd
 
-
-class Color(Enum):
-    Blue = "blue"
-    Green = "green"
-    Orange = "orange"
-    Red = "red"
-    Violet = "violet"
-    Grey = "grey"
-    Rainbow = "rainbow"
-
-    def __str__(self):
-        return self.value
+from enums import Color, State
 
 
 class Util:
+    STATE_COLOR_MAP: dict[State, Color] = {State.New: Color.Green, State.Edited: Color.Orange, State.Deleted: Color.Red}
 
     @staticmethod
-    def colored_text(text: str, color: Color):
+    def colored_text(text: str, state: State):
         """ This is as per the scheme supported by streamlit framework"""
-        return f':{color}[{text}]'
+        return f':{Util.STATE_COLOR_MAP[state]}[{text}]'
 
     @staticmethod
     def is_empty_df(df: pd.DataFrame) -> bool:
