@@ -21,3 +21,13 @@ class State(Enum):
 
     def __str__(self):
         return self.value
+
+
+class EndPoint(Enum):
+    Get = "get"
+    Post = "post"
+    Put = "put"
+    Delete = "delete"
+
+    def __str__(self):
+        return self.value

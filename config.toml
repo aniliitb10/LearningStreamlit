@@ -1,0 +1,10 @@
+model_module = "movie"
+model_class = "Movie"
+model_list_class = "MoviesList"
+host = "http://localhost"
+port = 8080
+[apis]
+get = "/movies/"
+put = "/movies/"
+post = "/movies/"
+delete = "/movies/"

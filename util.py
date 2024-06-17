@@ -12,5 +12,5 @@ class Util:
         return f':{Util.STATE_COLOR_MAP[state]}[{text}]'
 
     @staticmethod
-    def is_empty_df(df: pd.DataFrame) -> bool:
+    def is_none_or_empty_df(df: pd.DataFrame) -> bool:
         return df is None or df.shape[0] == 0
