@@ -1,4 +1,4 @@
-model_module = "movie"
+model_module = "model.movie"
 model_class = "Movie"
 model_list_class = "MoviesList"
 host = "http://localhost"

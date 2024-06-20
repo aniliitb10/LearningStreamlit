@@ -2,8 +2,9 @@ from itertools import chain
 
 import pandas as pd
 
-from enums import State
-from session_data import SessionData
+from core.session_data import SessionData
+from enums import Operation, State
+from util import Util
 
 
 class UpdateCalculator:
@@ -12,6 +13,7 @@ class UpdateCalculator:
         self.original_df: pd.DataFrame = df
 
     def _get_edited_rows(self) -> pd.DataFrame:
+        """ Creates two rows for changes in each row - one with original and one with new data """
         edited_rows: dict[int, dict] = SessionData.get_edit_data()
         edited_row_indices: list[int] = [k for k in edited_rows.keys()]
         impacted_rows: list[dict] = self.original_df.iloc[edited_row_indices].to_dict('records')
@@ -22,10 +24,10 @@ class UpdateCalculator:
             new_data_row: dict = dict(chain(impacted_rows[list_index].items(),
                                             edited_rows[changed_row_id].items()))
             if old_data_row != new_data_row:
-                diff.append(dict(chain(old_data_row.items(), {"state": "old"}.items())))
-                diff.append(dict(chain(new_data_row.items(), {"state": "new"}.items())))
+                diff.append(dict(chain(old_data_row.items(), {Util.STATE_STR: State.Old.value}.items())))
+                diff.append(dict(chain(new_data_row.items(), {Util.STATE_STR: State.New.value}.items())))
 
-        new_columns: list[str] = self.original_df.columns.to_list() + ["state"]
+        new_columns: list[str] = self.original_df.columns.to_list() + [Util.STATE_STR]
         return pd.DataFrame(data=diff, columns=new_columns)
 
     def _get_new_rows(self) -> pd.DataFrame:
@@ -33,10 +35,12 @@ class UpdateCalculator:
         return pd.DataFrame(data=[row for row in new_rows], columns=self.original_df.columns)
 
     def _get_deleted_rows(self) -> pd.DataFrame:
+        """ Although, st returns only the ids, but it makes sense to create the df using those ids"""
         deleted_rows: list[int] = SessionData.get_deleted_data()
         return self.original_df.iloc[deleted_rows]
 
-    def calculate_update(self) -> dict[State, pd.DataFrame]:
-        return {State.New: self._get_new_rows(),
-                State.Edited: self._get_edited_rows(),
-                State.Deleted: self._get_deleted_rows()}
+    def calculate_update(self) -> dict[Operation, pd.DataFrame]:
+        """ Returns the diff for all 3 operations - addition, edit and deletion """
+        return {Operation.New: self._get_new_rows(),
+                Operation.Edited: self._get_edited_rows(),
+                Operation.Deleted: self._get_deleted_rows()}

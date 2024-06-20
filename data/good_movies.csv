@@ -1,4 +1,4 @@
-Id,Title,Year,Votes,Rating,Genres, Link
+id,title,year,votes,rating,genres, link
 1,Red Dead Redemption II,2018,44878,9.7,"Action,Adventure,Crime", "https://www.imdb.com/title/tt6161168/"
 2,The Witcher 3: Wild Hunt,2015,29784,9.7,"Action,Adventure,Drama", "https://www.imdb.com/title/tt2993508/"
 3,The Last of Us,2013,71081,9.7,"Action,Adventure,Drama", "https://www.imdb.com/title/tt2993508/"

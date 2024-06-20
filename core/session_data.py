@@ -1,4 +1,4 @@
-import streamlit as sl
+import streamlit as st
 
 
 class SessionData:
@@ -6,7 +6,7 @@ class SessionData:
 
     @staticmethod
     def get_session_data() -> dict[str, dict]:
-        return getattr(sl.session_state, SessionData.Key, {})
+        return getattr(st.session_state, SessionData.Key, {})
 
     @staticmethod
     def get_edit_data() -> dict[int, dict]:
@@ -19,3 +19,7 @@ class SessionData:
     @staticmethod
     def get_deleted_data() -> list[int]:
         return SessionData.get_session_data().get("deleted_rows", [])
+
+    @staticmethod
+    def reset_session_data() -> None:
+        setattr(st.session_state, SessionData.Key, {})

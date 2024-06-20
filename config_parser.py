@@ -6,9 +6,10 @@ from enums import EndPoint
 from pydantic import BaseModel
 import importlib
 
-from model_list import ModelList
+from model.model import Model
+from model.model_list import ModelList
 
-expected_config_filepath = Path(__file__).parent / "config.toml"
+expected_config_filepath = Path(__file__).parent / "app_config.toml"
 
 
 class ConfigParser:
@@ -22,15 +23,15 @@ class ConfigParser:
     def get_end_point(self, end_point: EndPoint) -> str:
         return f'{self._config["host"]}:{self._config["port"]}{self._config["apis"][end_point.value]}'
 
-    def _get_class_impl(self, class_name: str) -> Union[Type[BaseModel], Type[ModelList]]:
+    def _get_class_impl(self, class_name: str) -> Union[Type[Model], Type[ModelList]]:
         module = importlib.import_module(self._config["model_module"])
         model_class: Type[BaseModel] = getattr(module, self._config[class_name])
-        if issubclass(model_class, BaseModel):
+        if issubclass(model_class, Model) or issubclass(model_class, ModelList):
             return model_class
 
         raise TypeError(f'Expected a type derived from BaseModel but found: {model_class}')
 
-    def get_model_class(self) -> Type[BaseModel]:
+    def get_model_class(self) -> Type[Model]:
         return self._get_class_impl("model_class")
 
     def get_model_list_class(self) -> Type[ModelList]:

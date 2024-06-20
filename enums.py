@@ -14,7 +14,7 @@ class Color(Enum):
         return self.value
 
 
-class State(Enum):
+class Operation(Enum):
     New = "New"
     Edited = "Edited"
     Deleted = "Deleted"
@@ -28,6 +28,15 @@ class EndPoint(Enum):
     Post = "post"
     Put = "put"
     Delete = "delete"
+
+    def __str__(self):
+        return self.value
+
+
+class State(Enum):
+    """ refers to the state of data/rows - new or old"""
+    New = "new"
+    Old = "old"
 
     def __str__(self):
         return self.value

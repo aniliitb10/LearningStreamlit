@@ -1,13 +1,15 @@
 import pandas as pd
 
-from enums import Color, State
+from enums import Color, Operation
 
 
 class Util:
-    STATE_COLOR_MAP: dict[State, Color] = {State.New: Color.Green, State.Edited: Color.Orange, State.Deleted: Color.Red}
+    STATE_COLOR_MAP: dict[Operation, Color] = {Operation.New: Color.Green, Operation.Edited: Color.Orange,
+                                               Operation.Deleted: Color.Red}
+    STATE_STR = "state"
 
     @staticmethod
-    def colored_text(text: str, state: State):
+    def colored_text(text: str, state: Operation):
         """ This is as per the scheme supported by streamlit framework"""
         return f':{Util.STATE_COLOR_MAP[state]}[{text}]'
 
