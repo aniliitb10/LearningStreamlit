@@ -29,7 +29,7 @@ class ConfigParser:
         if issubclass(model_class, Model) or issubclass(model_class, ModelList):
             return model_class
 
-        raise TypeError(f'Expected a type derived from BaseModel but found: {model_class}')
+        raise TypeError(f'Expected a type derived from Model or ModelList but found: {model_class}')
 
     def get_model_class(self) -> Type[Model]:
         return self._get_class_impl("model_class")

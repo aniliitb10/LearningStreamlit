@@ -1,11 +1,14 @@
-from typing import Optional
+from typing import Optional, Type
 
 import pandas as pd
 import streamlit as sl
 
+from config_parser import ConfigParser
 from core.persistence import Persistence
+from core.session_data import SessionData
 from core.update_calculator import UpdateCalculator
 from enums import Operation
+from model.model import Model
 from util import Util
 
 
@@ -13,14 +16,15 @@ class UpdateHandler:
     def __init__(self, df: pd.DataFrame):
         self.df: pd.DataFrame = df
         self._data_updates: dict[Operation, pd.DataFrame] = {}
+        self._model_class: Type[Model] = ConfigParser().get_model_class()
 
-    @staticmethod
-    def _update_data_view(update_data: dict[Operation, pd.DataFrame]):
+    def _update_data_view(self, ):
         for state in (Operation.New, Operation.Edited, Operation.Deleted):
-            state_data: Optional[pd.DataFrame] = update_data.get(state, None)
+            state_data: Optional[pd.DataFrame] = self._data_updates.get(state, None)
             if not Util.is_none_or_empty_df(state_data):
                 sl.subheader(Util.colored_text(f"{state} rows", state))
-                sl.dataframe(state_data, hide_index=True)
+                sl.dataframe(state_data, hide_index=True,
+                             column_config=self._model_class.get_column_config())
 
     def _update_widgets(self):
         """ As soon as there is some change, two buttons should appear - to either apply or discard the changes """
@@ -35,12 +39,13 @@ class UpdateHandler:
 
     def __call__(self, *args, **kwargs):
         self._data_updates = UpdateCalculator(self.df).calculate_update()
-        self._update_data_view(self._data_updates)
+        self._update_data_view()
         self._update_widgets()
 
     def _discard_changes(self) -> None:
         """ Although, can't undo the changes in data grid, this does remove the diff created from changes """
         self._data_updates = {}
+        SessionData.reset_data_editor()
 
     def _persist_changes(self):
         """ Expected to be called by 'Apply changes' button """
