@@ -1,9 +1,18 @@
-model_module = "model_impl.movie"
-model_class = "Movie"
-model_list_class = "MoviesList"
+[model]
+module = "impl.movie"
+class = "Movie"
+
+[model_list]
+module = "impl.movie"
+class = "MoviesList"
+
+[request]
+module = "base.request_handler"
+class = "RequestHandler"
+
+[apis]
 host = "http://localhost"
 port = 8080
-[apis]
 get = "/movies/"
 put = "/movies/"
 post = "/movies/"

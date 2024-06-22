@@ -7,8 +7,8 @@ import pandas as pd
 import streamlit as st
 from pydantic import Field, ConfigDict
 
-from model.model import Model
-from model.model_list import ModelList
+from base.model import Model
+from base.model_list import ModelList
 from util import Util
 
 

@@ -3,12 +3,12 @@ from typing import Optional, Type
 import pandas as pd
 import streamlit as sl
 
-from config_parser import ConfigParser
+from config import Config
 from core.persistence import Persistence
 from core.session_data import SessionData
 from core.update_calculator import UpdateCalculator
 from enums import Operation
-from model.model import Model
+from base.model import Model
 from util import Util
 
 
@@ -16,7 +16,7 @@ class UpdateHandler:
     def __init__(self, df: pd.DataFrame):
         self.df: pd.DataFrame = df
         self._data_updates: dict[Operation, pd.DataFrame] = {}
-        self._model_class: Type[Model] = ConfigParser().get_model_class()
+        self._model_class: Type[Model] = Config.get_instance().get_model_class()
 
     def _update_data_view(self, ):
         for state in (Operation.New, Operation.Edited, Operation.Deleted):

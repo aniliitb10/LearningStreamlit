@@ -1,17 +1,7 @@
-from io import StringIO
-from typing import Type
-
-import pandas as pd
-import requests
 import streamlit as st
-
-from config_parser import ConfigParser
-from enums import EndPoint
-from model.model import Model
 
 
 class SessionData:
-    Key: str = "ed"
     ResetKey: str = "reset"
 
     @staticmethod
@@ -45,14 +35,3 @@ class SessionData:
     @staticmethod
     def get_deleted_data() -> list[int]:
         return SessionData._get_session_data().get("deleted_rows", [])
-
-    @staticmethod
-    def get_data() -> pd.DataFrame:
-        config_parser: ConfigParser = ConfigParser()
-        df: pd.DataFrame = pd.read_json(StringIO(requests.get(url=config_parser.get_end_point(EndPoint.Get)).text))
-        model_class: Type[Model] = config_parser.get_model_class()
-
-        df.sort_values(by=[model_class.get_id_field()], ascending=True, inplace=True)
-        df.reset_index(drop=True, inplace=True)
-
-        return df
