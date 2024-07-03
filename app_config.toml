@@ -6,6 +6,10 @@ class = "Movie"
 module = "impl.movie"
 class = "MoviesList"
 
+[model_version]
+module = "impl.movie"
+class = "MovieVersion"
+
 [request]
 module = "base.request_handler"
 class = "RequestHandler"
@@ -13,7 +17,11 @@ class = "RequestHandler"
 [apis]
 host = "http://localhost"
 port = 8080
+[apis.movies]
 get = "/movies/"
 put = "/movies/"
 post = "/movies/"
 delete = "/movies/"
+
+[apis.movies_version]
+get = "/movie_audit/"

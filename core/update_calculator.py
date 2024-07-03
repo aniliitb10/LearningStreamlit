@@ -2,7 +2,7 @@ from itertools import chain
 
 import pandas as pd
 
-from core.session_data import SessionData
+from core.session_data_mgr import SessionDataMgr
 from enums import Operation, State
 from util import Util
 
@@ -14,7 +14,7 @@ class UpdateCalculator:
 
     def _get_edited_rows(self) -> pd.DataFrame:
         """ Creates two rows for changes in each row - one with original and one with new data """
-        edited_rows: dict[int, dict] = SessionData.get_edit_data()
+        edited_rows: dict[int, dict] = SessionDataMgr.get_instance().get_editor_data(Operation.Edited)
         edited_row_indices: list[int] = [k for k in edited_rows.keys()]
         impacted_rows: list[dict] = self.original_df.iloc[edited_row_indices].to_dict('records')
 
@@ -23,7 +23,7 @@ class UpdateCalculator:
             old_data_row: dict = impacted_rows[list_index]
             new_data_row: dict = dict(chain(impacted_rows[list_index].items(),
                                             edited_rows[changed_row_id].items()))
-            if old_data_row != new_data_row:
+            if old_data_row != new_data_row:  # don't show any changes if there is effectively no change
                 diff.append(dict(chain(old_data_row.items(), {Util.STATE_STR: State.Old.value}.items())))
                 diff.append(dict(chain(new_data_row.items(), {Util.STATE_STR: State.New.value}.items())))
 
@@ -31,12 +31,12 @@ class UpdateCalculator:
         return pd.DataFrame(data=diff, columns=new_columns)
 
     def _get_new_rows(self) -> pd.DataFrame:
-        new_rows: list[dict] = SessionData.get_new_data()
+        new_rows: list[dict] = SessionDataMgr.get_instance().get_editor_data(Operation.New)
         return pd.DataFrame(data=[row for row in new_rows], columns=self.original_df.columns)
 
     def _get_deleted_rows(self) -> pd.DataFrame:
         """ Although, st returns only the ids, but it makes sense to create the df using those ids"""
-        deleted_rows: list[int] = SessionData.get_deleted_data()
+        deleted_rows: list[int] = SessionDataMgr.get_instance().get_editor_data(Operation.Deleted)
         return self.original_df.iloc[deleted_rows]
 
     def calculate_update(self) -> dict[Operation, pd.DataFrame]:

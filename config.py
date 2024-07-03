@@ -40,15 +40,24 @@ class Config:
     def override_config(self, config_values: dict[str, Any]) -> None:
         self._config.update(config_values)
 
-    def get_end_point(self, end_point: EndPoint) -> str:
+    def _get_end_point_impl(self, group: str, end_point: EndPoint) -> str:
         apis_dict: dict[str, Union[str, int]] = self._config["apis"]
-        return f'{apis_dict["host"]}:{apis_dict["port"]}{apis_dict[end_point.value]}'
+        return f'{apis_dict["host"]}:{apis_dict["port"]}{apis_dict[group][end_point.value]}'
+
+    def get_model_version_end_point(self, end_point: EndPoint) -> str:
+        return self._get_end_point_impl("movies_version", end_point)
+
+    def get_movies_end_point(self, end_point: EndPoint) -> str:
+        return self._get_end_point_impl("movies", end_point)
 
     def get_model_class(self) -> Type[Model]:
         return self._get_class_impl("model", Model)
 
     def get_model_list_class(self) -> Type[ModelList]:
         return self._get_class_impl("model_list", ModelList)
+
+    def get_model_version_class(self) -> Type[Model]:
+        return self._get_class_impl("model_version", Model)
 
     def get_request_handler_class(self) -> Type[RequestHandler]:
         return self._get_class_impl("request", RequestHandler)
@@ -110,8 +119,9 @@ class Config:
 
 if __name__ == '__main__':
     config_instance = Config(EXPECTED_CONFIG_FILEPATH)
-    print(f'Get end point: {config_instance.get_end_point(EndPoint.Get)}')
+    print(f'Get end point: {config_instance.get_movies_end_point(EndPoint.Get)}')
     print(f'Model class: {config_instance.get_model_class()}')
     print(f'Model list class: {config_instance.get_model_list_class()}')
+    print(f'Model version class: {config_instance.get_model_version_class()}')
     print(f'More about base class: {config_instance.get_model_class().model_fields}')
     # Config(EXPECTED_CONFIG_FILEPATH)

@@ -3,12 +3,12 @@ from typing import Optional, Type
 import pandas as pd
 import streamlit as sl
 
+from base.model import Model
 from config import Config
 from core.persistence import Persistence
-from core.session_data import SessionData
+from core.session_data_mgr import SessionDataMgr
 from core.update_calculator import UpdateCalculator
-from enums import Operation
-from base.model import Model
+from enums import Operation, SessionDataEnum
 from util import Util
 
 
@@ -24,7 +24,7 @@ class UpdateHandler:
             if not Util.is_none_or_empty_df(state_data):
                 sl.subheader(Util.colored_text(f"{state} rows", state))
                 sl.dataframe(state_data, hide_index=True,
-                             column_config=self._model_class.get_column_config())
+                             column_config=self._model_class.get_column_config(), use_container_width=True)
 
     def _update_widgets(self):
         """ As soon as there is some change, two buttons should appear - to either apply or discard the changes """
@@ -45,9 +45,12 @@ class UpdateHandler:
     def _discard_changes(self) -> None:
         """ Although, can't undo the changes in data grid, this does remove the diff created from changes """
         self._data_updates = {}
-        SessionData.reset_data_editor()
+        session_data_mgr: SessionDataMgr = SessionDataMgr.get_instance()
+        session_data_mgr.clear_data()
+        session_data_mgr.change_key(SessionDataEnum.EditorData)
 
     def _persist_changes(self):
         """ Expected to be called by 'Apply changes' button """
         persistence = Persistence(self._data_updates)
         persistence.persist()
+        SessionDataMgr.get_instance().clear_data()

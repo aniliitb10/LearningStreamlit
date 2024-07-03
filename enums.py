@@ -40,3 +40,12 @@ class State(Enum):
 
     def __str__(self):
         return self.value
+
+
+class SessionDataEnum(Enum):
+    ModelTableData = "ModelTableData"
+    ModelVersionData = "ModelVersionData"
+    EditorData = "EditorData"
+
+    def __str__(self):
+        return self.value

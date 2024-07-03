@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+from itertools import chain
 from typing import List, Optional, Any
 
 import pandas as pd
@@ -13,6 +14,8 @@ from util import Util
 
 
 class Movie(Model):
+    model_config = ConfigDict(populate_by_name=True)
+
     title_id: int = Field(alias='id', serialization_alias='id')
     title: str = Field(alias='title')
     year: int = Field(alias='year')
@@ -50,3 +53,15 @@ class MoviesList(ModelList):
             return []
 
         return [m.title_id for m in MoviesList.from_df(df).movies]
+
+
+class MovieVersion(Movie):
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: str = Field(alias='version')
+
+    @staticmethod
+    def get_column_config() -> dict[str, Any]:
+        return dict(chain(super().get_column_config().items(), {
+            "version": st.column_config.NumberColumn("Version #", min_value=0,
+                                                     max_value=1000)}.items()))
