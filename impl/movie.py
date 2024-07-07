@@ -10,6 +10,7 @@ from pydantic import Field, ConfigDict
 
 from base.model import Model
 from base.model_list import ModelList
+from enums import Operation
 from util import Util
 
 
@@ -55,13 +56,16 @@ class MoviesList(ModelList):
         return [m.title_id for m in MoviesList.from_df(df).movies]
 
 
-class MovieVersion(Movie):
+class MovieAudit(Movie):
     model_config = ConfigDict(populate_by_name=True)
 
     version: str = Field(alias='version')
+    operation: Operation = Field(alias='operation')
 
     @staticmethod
     def get_column_config() -> dict[str, Any]:
-        return dict(chain(super().get_column_config().items(), {
+        return dict(chain(Movie.get_column_config().items(), {
             "version": st.column_config.NumberColumn("Version #", min_value=0,
-                                                     max_value=1000)}.items()))
+                                                     max_value=1000),
+            "operation": st.column_config.TextColumn("Operation")
+        }.items()))

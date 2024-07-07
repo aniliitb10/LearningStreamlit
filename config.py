@@ -8,28 +8,25 @@ from typing import Any, Type, Union, Optional
 from base.model import Model
 from base.model_list import ModelList
 from base.request_handler import RequestHandler
+from core.singleton import Singleton
 from enums import EndPoint
 
 EXPECTED_CONFIG_FILEPATH = Path(__file__).parent / "app_config.toml"
 
 
-class Config:
+class Config(Singleton):
     """
     A config class which is expected have to have just one instance across the lifetime of the app
-    So, better to call static methods to access the config
+    So, better to call classmethod @get_instance to access the config
     """
     _instance: Optional[Config] = None
 
     def __init__(self, filepath: Path):
         """ To maintain a single instance across the lifetime of the app, call get_instance instead """
-
-        if Config._instance:
-            raise ValueError(f"Config's instance already exists")
+        super().__init__()
 
         with filepath.open("rb") as fp:
             self._config = tomllib.load(fp)
-
-        Config._instance = self  # even if the static method is not used, now this instance is linked to class itself
 
     def get_value(self, key: str) -> Any:
         return self._config.get(key, None)
@@ -44,10 +41,10 @@ class Config:
         apis_dict: dict[str, Union[str, int]] = self._config["apis"]
         return f'{apis_dict["host"]}:{apis_dict["port"]}{apis_dict[group][end_point.value]}'
 
-    def get_model_version_end_point(self, end_point: EndPoint) -> str:
-        return self._get_end_point_impl("movies_version", end_point)
+    def get_model_audit_end_point(self, end_point: EndPoint) -> str:
+        return self._get_end_point_impl("movies_audit", end_point)
 
-    def get_movies_end_point(self, end_point: EndPoint) -> str:
+    def get_model_end_point(self, end_point: EndPoint) -> str:
         return self._get_end_point_impl("movies", end_point)
 
     def get_model_class(self) -> Type[Model]:
@@ -56,18 +53,14 @@ class Config:
     def get_model_list_class(self) -> Type[ModelList]:
         return self._get_class_impl("model_list", ModelList)
 
-    def get_model_version_class(self) -> Type[Model]:
-        return self._get_class_impl("model_version", Model)
+    def get_model_audit_class(self) -> Type[Model]:
+        return self._get_class_impl("model_audit", Model)
 
     def get_request_handler_class(self) -> Type[RequestHandler]:
         return self._get_class_impl("request", RequestHandler)
 
-    @staticmethod
-    def has_instance():
-        return Config._instance is not None
-
-    @staticmethod
-    def get_instance(config_file_path: Optional[Union[Path, str]] = None) -> Config:
+    @classmethod
+    def get_instance(cls, config_file_path: Optional[Union[Path, str]] = None) -> Config:
         """
         It is optional to pass `config_file_path`. if it is `None`:
          - existing instance will be returned
@@ -81,17 +74,12 @@ class Config:
             config_file_path: Path = Config._validate_file_path(config_file_path)
 
             Config.reset_instance()  # if the instance already existed, initializer will raise exception
-            Config._instance = Config(config_file_path)
-            return Config._instance
+            return Config(config_file_path)
 
-        if Config._instance is None:
-            Config._instance = Config(EXPECTED_CONFIG_FILEPATH)
+        if cls._instance is None:
+            cls._instance = Config(EXPECTED_CONFIG_FILEPATH)
 
-        return Config._instance
-
-    @staticmethod
-    def reset_instance() -> None:
-        Config._instance = None
+        return cls._instance
 
     @staticmethod
     def _validate_file_path(filepath: Union[Path, str]) -> Path:
@@ -119,9 +107,10 @@ class Config:
 
 if __name__ == '__main__':
     config_instance = Config(EXPECTED_CONFIG_FILEPATH)
-    print(f'Get end point: {config_instance.get_movies_end_point(EndPoint.Get)}')
+    print(f'Get end point: {config_instance.get_model_end_point(EndPoint.Get)}')
     print(f'Model class: {config_instance.get_model_class()}')
     print(f'Model list class: {config_instance.get_model_list_class()}')
-    print(f'Model version class: {config_instance.get_model_version_class()}')
+    print(f'Model audit class: {config_instance.get_model_audit_class()}')
     print(f'More about base class: {config_instance.get_model_class().model_fields}')
-    # Config(EXPECTED_CONFIG_FILEPATH)
+    print(f'Testing instance by id: {Config.get_instance() is config_instance}')
+    # Config(None)  # must throw

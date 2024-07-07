@@ -44,7 +44,7 @@ class State(Enum):
 
 class SessionDataEnum(Enum):
     ModelTableData = "ModelTableData"
-    ModelVersionData = "ModelVersionData"
+    ModelAuditData = "ModelAuditData"
     EditorData = "EditorData"
 
     def __str__(self):

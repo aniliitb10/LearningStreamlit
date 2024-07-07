@@ -2,36 +2,42 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Union
+from typing import Any, Union, Optional
 
 import streamlit as st
 
+from core.singleton import Singleton
 from enums import SessionDataEnum, Operation
 
 
 @dataclass
 class EditorMetaData:
+    """
+    editor_data method of streamlit maintains edited DataFrame rows in a particular format
+    e.g. for any newly added rows, key is "added_rows" and value is a list of dictionaries
+    So, this class is intended to hold such data together
+    """
     operation_type: Operation
     operation_key: str
     default_value: Union[dict, list]
 
-
-class SessionDataMgr:
-    _instance: SessionDataMgr = None
-
-    def __init__(self, session_data: dict[str, Any]):
-        if SessionDataMgr._instance:
-            return
-
-        self.session_data: dict[str, Any] = session_data
-        self.key_map: dict[SessionDataEnum, str] = {e: f'{e}_{datetime.now()}' for e in SessionDataEnum}
-        self.editor_data_config: dict[Operation, EditorMetaData] = {
+    @staticmethod
+    def get_editor_data_config() -> dict[Operation, EditorMetaData]:
+        return {
             Operation.New: EditorMetaData(Operation.New, "added_rows", []),
             Operation.Edited: EditorMetaData(Operation.Edited, "edited_rows", {}),
             Operation.Deleted: EditorMetaData(Operation.Deleted, "deleted_rows", []),
         }
 
-        SessionDataMgr._instance = self
+
+class SessionDataMgr(Singleton):
+    _instance: Optional[SessionDataMgr] = None
+
+    def __init__(self, session_data: dict[str, Any]):
+        super().__init__()
+        self.session_data: dict[str, Any] = session_data
+        self.key_map: dict[SessionDataEnum, str] = {e: f'{e}_{datetime.now()}' for e in SessionDataEnum}
+        self.editor_data_config: dict[Operation, EditorMetaData] = EditorMetaData.get_editor_data_config()
 
     def clear_data(self, key_enum: SessionDataEnum = None) -> None:
         if key_enum:
@@ -58,22 +64,20 @@ class SessionDataMgr:
         m: EditorMetaData = self.editor_data_config[operation]
         return self.session_data.get(self.key_map[SessionDataEnum.EditorData]).get(m.operation_key, m.default_value)
 
-    @staticmethod
-    def reset_instance():
-        SessionDataMgr._instance = None
-
-    @staticmethod
-    def get_instance(session_data: dict[str, Any] = None):
+    @classmethod
+    def get_instance(cls, session_data: dict[str, Any] = None) -> SessionDataMgr | Singleton:
         if session_data:  # if provided, the use it - helpful for testing
-            SessionDataMgr.reset_instance()
+            cls.reset_instance()
             return SessionDataMgr(session_data)
 
-        if SessionDataMgr._instance:
-            return SessionDataMgr._instance
+        if cls._instance is None:
+            cls._instance = SessionDataMgr(st.session_state)
 
-        return SessionDataMgr(st.session_state)
+        return cls._instance
 
 
 if __name__ == '__main__':
     session_data_mgr: SessionDataMgr = SessionDataMgr({'dummy': 'data'})
     print(SessionDataMgr.get_instance().session_data)
+    print(f'Test by id: {session_data_mgr is SessionDataMgr.get_instance()}')
+    # SessionDataMgr({})  # must throw

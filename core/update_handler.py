@@ -6,6 +6,7 @@ import streamlit as sl
 from base.model import Model
 from config import Config
 from core.persistence import Persistence
+from core.response_data import ResponseData
 from core.session_data_mgr import SessionDataMgr
 from core.update_calculator import UpdateCalculator
 from enums import Operation, SessionDataEnum
@@ -52,5 +53,9 @@ class UpdateHandler:
     def _persist_changes(self):
         """ Expected to be called by 'Apply changes' button """
         persistence = Persistence(self._data_updates)
-        persistence.persist()
+        persistence_response: dict[Operation, Optional[ResponseData]] = persistence.persist()
+        for operation, response in persistence_response.items():
+            if response and not response.is_status_ok:
+                sl.error(f'There was some issue in handling [{operation.value}] data: [{response.error_msg}]')
+
         SessionDataMgr.get_instance().clear_data()
