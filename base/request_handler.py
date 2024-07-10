@@ -38,6 +38,10 @@ class RequestHandler:
 
             return ResponseData(response.status_code, error_msg="No Data")
 
+        if response.text:
+            return ResponseData(response.status_code, error_msg=response.text)
+
+        # Now, the error message is no obvious, hence let's use what we can get from the library itself
         try:
             response.raise_for_status()  # this might enrich the error message
         except requests.exceptions.HTTPError as err:

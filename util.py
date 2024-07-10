@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 
 from enums import Color, Operation
@@ -16,3 +18,9 @@ class Util:
     @staticmethod
     def is_none_or_empty_df(df: pd.DataFrame) -> bool:
         return df is None or df.shape[0] == 0 or df.dropna(how='all').shape[0] == 0
+
+    @staticmethod
+    def flash_message(handler, message: str, icon: str = "🚨", seconds: int = 3):
+        alert = handler(message, icon=icon)
+        time.sleep(seconds)
+        alert.empty()

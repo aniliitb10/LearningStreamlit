@@ -28,12 +28,14 @@ class Movie(Model):
     def get_column_config() -> dict[str, Any]:
         return {
             "id": st.column_config.NumberColumn("Title Id", help="Id of the title", min_value=1,
-                                                max_value=100_000_000_000, step=1),
-            "title": st.column_config.TextColumn("Movie Title", max_chars=100),
-            "year": st.column_config.NumberColumn("Release Year", min_value=1900, max_value=date.today().year + 5),
-            "votes": st.column_config.NumberColumn("Votes", min_value=1, max_value=8_000_000_000),
-            "rating": st.column_config.NumberColumn("Rating", min_value=0, max_value=10, step=0.1, format="%.1f"),
-            "genres": st.column_config.TextColumn("Genres", max_chars=100, validate="^[a-zA-z ,-]+$"),
+                                                max_value=100_000_000_000, step=1, required=True),
+            "title": st.column_config.TextColumn("Movie Title", max_chars=100, required=True),
+            "year": st.column_config.NumberColumn("Release Year", min_value=1900, max_value=date.today().year + 5,
+                                                  required=True),
+            "votes": st.column_config.NumberColumn("Votes", min_value=1, max_value=8_000_000_000, required=True),
+            "rating": st.column_config.NumberColumn("Rating", min_value=0, max_value=10, step=0.1, format="%.1f",
+                                                    required=True),
+            "genres": st.column_config.TextColumn("Genres", max_chars=100, validate="^[a-zA-z ,-]+$", required=True),
         }
 
 

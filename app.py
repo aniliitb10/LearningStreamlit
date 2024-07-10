@@ -11,8 +11,8 @@ from util import Util
 
 
 def update_table_view():
-    session_data_mgr = SessionDataMgr.get_instance()
     config: Config = Config.get_instance()
+    session_data_mgr = SessionDataMgr.get_instance()
     df: pd.DataFrame = session_data_mgr.get_data(SessionDataEnum.ModelTableData)
 
     if Util.is_none_or_empty_df(df):
@@ -31,6 +31,7 @@ def update_table_view():
 
 
 def update_table_audit_view():
+    config: Config = Config.get_instance()
     movie_id: int = int(st.number_input("Please enter Id", min_value=0, max_value=100_000_000, step=1))
 
     if movie_id <= 0:
@@ -41,7 +42,6 @@ def update_table_audit_view():
         st.error(data.error_msg, icon="🚨")
         return
 
-    config: Config = Config.get_instance()
     st.dataframe(data.df, use_container_width=True,
                  column_order=config.get_model_audit_class().get_column_config().keys(),
                  column_config=config.get_model_audit_class().get_column_config())

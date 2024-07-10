@@ -56,6 +56,9 @@ class UpdateHandler:
         persistence_response: dict[Operation, Optional[ResponseData]] = persistence.persist()
         for operation, response in persistence_response.items():
             if response and not response.is_status_ok:
-                sl.error(f'There was some issue in handling [{operation.value}] data: [{response.error_msg}]')
+                Util.flash_message(sl.error, f'There was some issue in handling [{operation.value}]'
+                                             f' data: {response.error_msg}')
+                self._discard_changes()
+                return
 
         SessionDataMgr.get_instance().clear_data()

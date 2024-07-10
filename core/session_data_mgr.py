@@ -6,7 +6,6 @@ from typing import Any, Union, Optional
 
 import streamlit as st
 
-from core.singleton import Singleton
 from enums import SessionDataEnum, Operation
 
 
@@ -30,14 +29,15 @@ class EditorMetaData:
         }
 
 
-class SessionDataMgr(Singleton):
+class SessionDataMgr:
     _instance: Optional[SessionDataMgr] = None
 
     def __init__(self, session_data: dict[str, Any]):
-        super().__init__()
         self.session_data: dict[str, Any] = session_data
         self.key_map: dict[SessionDataEnum, str] = {e: f'{e}_{datetime.now()}' for e in SessionDataEnum}
         self.editor_data_config: dict[Operation, EditorMetaData] = EditorMetaData.get_editor_data_config()
+
+        SessionDataMgr._instance = self
 
     def clear_data(self, key_enum: SessionDataEnum = None) -> None:
         if key_enum:
@@ -65,7 +65,15 @@ class SessionDataMgr(Singleton):
         return self.session_data.get(self.key_map[SessionDataEnum.EditorData]).get(m.operation_key, m.default_value)
 
     @classmethod
-    def get_instance(cls, session_data: dict[str, Any] = None) -> SessionDataMgr | Singleton:
+    def reset_instance(cls):
+        cls._instance = None
+
+    @classmethod
+    def has_instance(cls) -> bool:
+        return cls._instance is not None
+
+    @classmethod
+    def get_instance(cls, session_data: dict[str, Any] = None) -> SessionDataMgr:
         if session_data:  # if provided, the use it - helpful for testing
             cls.reset_instance()
             return SessionDataMgr(session_data)

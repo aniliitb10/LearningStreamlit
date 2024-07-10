@@ -8,13 +8,12 @@ from typing import Any, Type, Union, Optional
 from base.model import Model
 from base.model_list import ModelList
 from base.request_handler import RequestHandler
-from core.singleton import Singleton
 from enums import EndPoint
 
 EXPECTED_CONFIG_FILEPATH = Path(__file__).parent / "app_config.toml"
 
 
-class Config(Singleton):
+class Config:
     """
     A config class which is expected have to have just one instance across the lifetime of the app
     So, better to call classmethod @get_instance to access the config
@@ -23,10 +22,11 @@ class Config(Singleton):
 
     def __init__(self, filepath: Path):
         """ To maintain a single instance across the lifetime of the app, call get_instance instead """
-        super().__init__()
 
         with filepath.open("rb") as fp:
             self._config = tomllib.load(fp)
+
+        Config._instance = self
 
     def get_value(self, key: str) -> Any:
         return self._config.get(key, None)
@@ -58,6 +58,14 @@ class Config(Singleton):
 
     def get_request_handler_class(self) -> Type[RequestHandler]:
         return self._get_class_impl("request", RequestHandler)
+
+    @classmethod
+    def reset_instance(cls):
+        cls._instance = None
+
+    @classmethod
+    def has_instance(cls) -> bool:
+        return cls._instance is not None
 
     @classmethod
     def get_instance(cls, config_file_path: Optional[Union[Path, str]] = None) -> Config:
@@ -104,13 +112,3 @@ class Config(Singleton):
 
         raise TypeError(f'Expected a type (or derived from) [{class_type}] but found: [{model_class}]')
 
-
-if __name__ == '__main__':
-    config_instance = Config(EXPECTED_CONFIG_FILEPATH)
-    print(f'Get end point: {config_instance.get_model_end_point(EndPoint.Get)}')
-    print(f'Model class: {config_instance.get_model_class()}')
-    print(f'Model list class: {config_instance.get_model_list_class()}')
-    print(f'Model audit class: {config_instance.get_model_audit_class()}')
-    print(f'More about base class: {config_instance.get_model_class().model_fields}')
-    print(f'Testing instance by id: {Config.get_instance() is config_instance}')
-    # Config(None)  # must throw
