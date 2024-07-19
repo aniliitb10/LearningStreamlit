@@ -1,3 +1,5 @@
+name = "movies"
+
 [model]
 module = "impl.movie"
 class = "Movie"
@@ -18,11 +20,11 @@ class = "RequestHandler"
 host = "http://localhost"
 port = 8080
 
-[apis.movies]
+[apis.model]
 get = "/movies/"
 put = "/movies/"
 post = "/movies/"
 delete = "/movies/"
 
-[apis.movies_audit]
+[apis.model_audit]
 get = "/movie_audit/"

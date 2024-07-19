@@ -42,7 +42,7 @@ class State(Enum):
         return self.value
 
 
-class SessionDataEnum(Enum):
+class SessionDataTypeEnum(Enum):
     ModelTableData = "ModelTableData"
     ModelAuditData = "ModelAuditData"
     EditorData = "EditorData"

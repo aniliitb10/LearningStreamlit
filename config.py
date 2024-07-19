@@ -10,7 +10,7 @@ from base.model_list import ModelList
 from base.request_handler import RequestHandler
 from enums import EndPoint
 
-EXPECTED_CONFIG_FILEPATH = Path(__file__).parent / "app_config.toml"
+EXPECTED_CONFIG_DIR = Path(__file__).parent / "configs"
 
 
 class Config:
@@ -26,12 +26,19 @@ class Config:
         with filepath.open("rb") as fp:
             self._config = tomllib.load(fp)
 
+        self.name = self._config.get("name", None)
         Config._instance = self
+
+        self.model_class: Type[Model] = self._get_class_impl("model", Model)
+        self.model_list_class: Type[ModelList] = self._get_class_impl("model_list", ModelList)
+        self.model_audit_class: Type[Model] = self._get_class_impl("model_audit", Model)
+        self.request_handler_class: Type[RequestHandler] = self._get_class_impl("request", RequestHandler)
 
     def get_value(self, key: str) -> Any:
         return self._config.get(key, None)
 
-    def get_parsed_config(self) -> dict[str, Any]:
+    @property
+    def parsed_config(self) -> dict[str, Any]:
         return self._config
 
     def override_config(self, config_values: dict[str, Any]) -> None:
@@ -42,22 +49,10 @@ class Config:
         return f'{apis_dict["host"]}:{apis_dict["port"]}{apis_dict[group][end_point.value]}'
 
     def get_model_audit_end_point(self, end_point: EndPoint) -> str:
-        return self._get_end_point_impl("movies_audit", end_point)
+        return self._get_end_point_impl("model_audit", end_point)
 
     def get_model_end_point(self, end_point: EndPoint) -> str:
-        return self._get_end_point_impl("movies", end_point)
-
-    def get_model_class(self) -> Type[Model]:
-        return self._get_class_impl("model", Model)
-
-    def get_model_list_class(self) -> Type[ModelList]:
-        return self._get_class_impl("model_list", ModelList)
-
-    def get_model_audit_class(self) -> Type[Model]:
-        return self._get_class_impl("model_audit", Model)
-
-    def get_request_handler_class(self) -> Type[RequestHandler]:
-        return self._get_class_impl("request", RequestHandler)
+        return self._get_end_point_impl("model", end_point)
 
     @classmethod
     def reset_instance(cls):
@@ -68,41 +63,17 @@ class Config:
         return cls._instance is not None
 
     @classmethod
-    def get_instance(cls, config_file_path: Optional[Union[Path, str]] = None) -> Config:
-        """
-        It is optional to pass `config_file_path`. if it is `None`:
-         - existing instance will be returned
-         - in case, there is no instance, it will fall back to `EXPECTED_CONFIG_FILEPATH`
-        :param config_file_path: A `Path` or `str` object representing the object
-        :return: `Config` object
-        """
+    def get_configs(cls, config_file_dir: Union[Path, str] = EXPECTED_CONFIG_DIR) -> dict[str, Config]:
 
-        if config_file_path:  # if path is provided, new instance must always be created
-            # After validation, it can only be an instance of Path class
-            config_file_path: Path = Config._validate_file_path(config_file_path)
+        if not config_file_dir or not Path(config_file_dir).is_dir():
+            raise NotADirectoryError(config_file_dir)
 
-            Config.reset_instance()  # if the instance already existed, initializer will raise exception
-            return Config(config_file_path)
+        config_files = Path(config_file_dir).glob("**/*.toml")
+        if not config_files:
+            raise FileNotFoundError(config_file_dir)
 
-        if cls._instance is None:
-            cls._instance = Config(EXPECTED_CONFIG_FILEPATH)
-
-        return cls._instance
-
-    @staticmethod
-    def _validate_file_path(filepath: Union[Path, str]) -> Path:
-        """ Validates and returns a valid file path """
-
-        if not isinstance(filepath, Path) and not isinstance(filepath, str):
-            raise TypeError('filepath must be a Path object (or string which represents the Path)')
-
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
-
-        if not filepath.is_file():
-            raise FileNotFoundError(f'Config file [{filepath}] does not exist')
-
-        return filepath
+        parsed_configs: list[Config] = [Config(config_file) for config_file in config_files]
+        return {config.name: config for config in parsed_configs}
 
     def _get_class_impl(self, group: str, class_type):
         module = importlib.import_module(self._config[group]["module"])
@@ -112,3 +83,12 @@ class Config:
 
         raise TypeError(f'Expected a type (or derived from) [{class_type}] but found: [{model_class}]')
 
+    def __repr__(self):
+        return self.name
+
+    def __str__(self):
+        return repr(self)
+
+
+if __name__ == '__main__':
+    print(Config.get_configs()["movies"].parsed_config)
