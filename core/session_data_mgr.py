@@ -20,7 +20,7 @@ class SessionDataMgr:
 
         SessionDataMgr._instance = self
 
-    def get_model_data(self, model: str) -> ModelSessionData:
+    def get_model_data(self, model: str) -> ModelSessionData | None:
         return self.model_data.get(model)  # better to throw key not found error instead of None
 
     def __str__(self):
@@ -29,24 +29,6 @@ class SessionDataMgr:
     def __repr__(self):
         return ('Session Data Manager\n' +
                 '\n'.join([f'model:{model}, data:\n{data}\n' for model, data in self.model_data.items()]))
-
-    # def clear_data(self, model: str, key_enum: SessionDataTypeEnum = None) -> None:
-    #     self.model_data[model].clear_data(key_enum)
-    #
-    # def update_data(self, model: str, key_enum: SessionDataTypeEnum, value: Any):
-    #     self.model_data[model].update_data(key_enum, value)
-    #
-    # def get_data(self, model: str, key_enum: SessionDataTypeEnum) -> Any:
-    #     return self.model_data[model].get_data(key_enum)
-    #
-    # def change_key(self, model: str, key_enum: SessionDataTypeEnum):
-    #     self.model_data[model].change_key(key_enum)
-    #
-    # def get_key(self, model: str, key_enum: SessionDataTypeEnum) -> str:
-    #     return self.model_data[model].get_key(key_enum)
-    #
-    # def get_editor_data(self, model: str, operation: Operation) -> Any:
-    #     return self.model_data[model].get_editor_data(operation)
 
     @classmethod
     def reset_instance(cls):

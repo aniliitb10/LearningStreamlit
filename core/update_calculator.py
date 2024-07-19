@@ -2,19 +2,16 @@ from itertools import chain
 
 import pandas as pd
 
-from config import Config
 from core.model_session_data import ModelSessionData
-from core.session_data_mgr import SessionDataMgr
 from enums import Operation, State
 from util import Util
 
 
 class UpdateCalculator:
 
-    def __init__(self, df: pd.DataFrame, config: Config):
+    def __init__(self, df: pd.DataFrame, session_data: ModelSessionData):
         self.original_df: pd.DataFrame = df
-        self.config = config
-        self.session_data: ModelSessionData = SessionDataMgr.get_instance().get_model_data(self.config.name)
+        self.session_data: ModelSessionData = session_data
 
     def _get_edited_rows(self) -> pd.DataFrame:
         """ Creates two rows for changes in each row - one with original and one with new data """

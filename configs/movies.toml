@@ -12,13 +12,13 @@ class = "MoviesList"
 module = "impl.movie"
 class = "MovieAudit"
 
-[request]
-module = "base.request_handler"
-class = "RequestHandler"
-
 [apis]
 host = "http://localhost"
 port = 8080
+
+[request]
+module = "base.request_handler"
+class = "RequestHandler"
 
 [apis.model]
 get = "/movies/"

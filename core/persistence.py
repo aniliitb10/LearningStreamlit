@@ -6,7 +6,7 @@ import pandas as pd
 from base.model import Model
 from base.model_list import ModelList
 from base.request_handler import RequestHandler
-from config import Config
+from core.model_config import ModelConfig
 from core.response_data import ResponseData
 from enums import Operation, EndPoint, State
 from util import Util
@@ -15,9 +15,9 @@ from util import Util
 class Persistence:
     common_headers: dict[str, str] = {'Content-type': 'application/json', 'Accept': 'application/json'}
 
-    def __init__(self, config: Config, changed_data: dict[Operation, pd.DataFrame]):
+    def __init__(self, config: ModelConfig, changed_data: dict[Operation, pd.DataFrame]):
         self._changed_data: dict[Operation, pd.DataFrame] = changed_data
-        self._config: Config = config
+        self._config: ModelConfig = config
         self._model_list_class: Type[ModelList] = self._config.model_list_class
         self._request_handler_class: Type[RequestHandler] = self._config.request_handler_class
 
@@ -80,18 +80,13 @@ class Persistence:
         return response_data
 
     @staticmethod
-    def get_model_data(config: Config) -> ResponseData:
+    def get_model_data(config: ModelConfig) -> ResponseData:
         return Persistence._get_data_impl(url=config.get_model_end_point(EndPoint.Get),
                                           model_class=config.model_class,
                                           request_handler=config.request_handler_class)
 
     @staticmethod
-    def get_model_audit_data(config: Config, model_id: int) -> ResponseData:
+    def get_model_audit_data(config: ModelConfig, model_id: int) -> ResponseData:
         return Persistence._get_data_impl(url=f'{config.get_model_audit_end_point(EndPoint.Get)}{model_id}/',
                                           model_class=config.model_audit_class,
                                           request_handler=config.request_handler_class)
-
-# if __name__ == '__main__':
-#     persistence = Persistence({Operation.New: pd.read_csv('../data/good_movies.csv')})
-#     persist_response = persistence.persist()
-#     print(persist_response)

@@ -24,8 +24,8 @@ class Movie(Model):
     rating: float = Field(alias='rating')
     genres: str = Field(alias='genres')
 
-    @staticmethod
-    def get_column_config() -> dict[str, Any]:
+    @classmethod
+    def get_column_config(cls) -> dict[str, Any]:
         return {
             "id": st.column_config.NumberColumn("Title Id", help="Id of the title", min_value=1,
                                                 max_value=100_000_000_000, step=1, required=True),
@@ -43,15 +43,15 @@ class MoviesList(ModelList):
     model_config = ConfigDict(populate_by_name=True)
     movies: List[Movie] = Field(serialization_alias='movieEntities')
 
-    @staticmethod
-    def from_df(df: pd.DataFrame) -> Optional[MoviesList]:
+    @classmethod
+    def from_df(cls, df: pd.DataFrame) -> Optional[MoviesList]:
         if Util.is_none_or_empty_df(df):
             return None
 
         return MoviesList(movies=[Movie.model_validate(m) for m in df.to_dict('records')])
 
-    @staticmethod
-    def get_ids(df: pd.DataFrame) -> list[int]:
+    @classmethod
+    def get_ids(cls, df: pd.DataFrame) -> list[int]:
         if Util.is_none_or_empty_df(df):
             return []
 
@@ -64,8 +64,8 @@ class MovieAudit(Movie):
     version: str = Field(alias='version')
     operation: Operation = Field(alias='operation')
 
-    @staticmethod
-    def get_column_config() -> dict[str, Any]:
+    @classmethod
+    def get_column_config(cls) -> dict[str, Any]:
         return dict(chain(Movie.get_column_config().items(), {
             "version": st.column_config.NumberColumn("Version #", min_value=0,
                                                      max_value=1000),

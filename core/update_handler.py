@@ -4,22 +4,22 @@ import pandas as pd
 import streamlit as sl
 
 from base.model import Model
-from config import Config
+from core.model_config import ModelConfig
 from core.model_session_data import ModelSessionData
 from core.persistence import Persistence
 from core.response_data import ResponseData
 from core.session_data_mgr import SessionDataMgr
 from core.update_calculator import UpdateCalculator
-from enums import Operation, SessionDataTypeEnum
+from enums import Operation, ModelSessionDataEnum
 from util import Util
 
 
 class UpdateHandler:
     """ This must be created specific to a Model"""
 
-    def __init__(self, df: pd.DataFrame, config: Config):
+    def __init__(self, df: pd.DataFrame, config: ModelConfig):
         self.df: pd.DataFrame = df
-        self.config: Config = config
+        self.config: ModelConfig = config
         self._data_updates: dict[Operation, pd.DataFrame] = {}
         self._model_class: Type[Model] = self.config.model_class
 
@@ -43,7 +43,8 @@ class UpdateHandler:
                 sl.button('Apply Changes', type="primary", on_click=self._persist_changes)
 
     def __call__(self, *args, **kwargs):
-        self._data_updates = UpdateCalculator(self.df, self.config).calculate_update()
+        model_session_data: ModelSessionData = SessionDataMgr.get_instance().get_model_data(self.config.name)
+        self._data_updates = UpdateCalculator(self.df, model_session_data).calculate_update()
         self._update_data_view()
         self._update_widgets()
 
@@ -52,7 +53,7 @@ class UpdateHandler:
         self._data_updates = {}
         session_data: ModelSessionData = SessionDataMgr.get_instance().get_model_data(self.config.name)
         session_data.clear_data()
-        session_data.change_key(SessionDataTypeEnum.EditorData)
+        session_data.change_key(ModelSessionDataEnum.EditorData)
 
     def _persist_changes(self):
         """ Expected to be called by 'Apply changes' button """

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Union
 
-from enums import Operation, SessionDataTypeEnum
+from enums import Operation, ModelSessionDataEnum
 
 
 @dataclass
@@ -18,8 +18,8 @@ class EditorMetaData:
     operation_key: str  # like, added_rows, edited_rows or deleted_rows
     default_value: Union[dict, list]
 
-    @staticmethod
-    def get_editor_metadata_config() -> dict[Operation, EditorMetaData]:
+    @classmethod
+    def get_editor_metadata_map(cls) -> dict[Operation, EditorMetaData]:
         return {
             Operation.New: EditorMetaData(Operation.New, "added_rows", []),
             Operation.Edited: EditorMetaData(Operation.Edited, "edited_rows", {}),
@@ -27,13 +27,13 @@ class EditorMetaData:
         }
 
     @classmethod
-    def get_key_map(cls, model: str) -> dict[SessionDataTypeEnum, str]:
-        return {e: cls.get_new_key(model, e) for e in SessionDataTypeEnum}
+    def get_key_map(cls, model: str) -> dict[ModelSessionDataEnum, str]:
+        return {e: cls.get_new_key(model, e) for e in ModelSessionDataEnum}
 
     @classmethod
-    def get_new_key(cls, model: str, session_enum: SessionDataTypeEnum) -> str:
+    def get_new_key(cls, model: str, session_enum: ModelSessionDataEnum) -> str:
         return f'{model}|{session_enum.value}|{datetime.now()}'
 
 
 # to be used like a global variable
-EditorMetaDataConfig: dict[Operation, EditorMetaData] = EditorMetaData.get_editor_metadata_config()
+EditorMetaDataMap: dict[Operation, EditorMetaData] = EditorMetaData.get_editor_metadata_map()
