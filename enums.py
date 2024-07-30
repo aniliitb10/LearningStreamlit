@@ -42,9 +42,9 @@ class State(Enum):
         return self.value
 
 
-class SessionDataEnum(Enum):
-    ModelTableData = "ModelTableData"
-    ModelAuditData = "ModelAuditData"
+class ModelSessionDataEnum(Enum):
+    TableData = "TableData"
+    AuditData = "AuditData"
     EditorData = "EditorData"
 
     def __str__(self):

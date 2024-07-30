@@ -2,12 +2,11 @@ import json
 from typing import Type, Optional
 
 import pandas as pd
-import requests
 
 from base.model import Model
 from base.model_list import ModelList
 from base.request_handler import RequestHandler
-from config import Config
+from core.model_config import ModelConfig
 from core.response_data import ResponseData
 from enums import Operation, EndPoint, State
 from util import Util
@@ -16,11 +15,11 @@ from util import Util
 class Persistence:
     common_headers: dict[str, str] = {'Content-type': 'application/json', 'Accept': 'application/json'}
 
-    def __init__(self, changed_data: dict[Operation, pd.DataFrame]):
+    def __init__(self, config: ModelConfig, changed_data: dict[Operation, pd.DataFrame]):
         self._changed_data: dict[Operation, pd.DataFrame] = changed_data
-        self._config: Config = Config.get_instance()
-        self._model_list_class: Type[ModelList] = self._config.get_model_list_class()
-        self._request_handler_class: Type[RequestHandler] = self._config.get_request_handler_class()
+        self._config: ModelConfig = config
+        self._model_list_class: Type[ModelList] = self._config.model_list_class
+        self._request_handler_class: Type[RequestHandler] = self._config.request_handler_class
 
     def persist(self) -> dict[Operation, Optional[ResponseData]]:
         return {Operation.New: self._persist_new(),
@@ -66,14 +65,14 @@ class Persistence:
                                                          headers=self.common_headers)
 
     @staticmethod
-    def _get_data_impl(url: str, model_class: Type[Model]) -> ResponseData:
+    def _get_data_impl(url: str, model_class: Type[Model], request_handler: Type[RequestHandler]) -> ResponseData:
         """
         This might seem a little counter-intuitive - why this is static?
         - Well, it has no reason to be an instance member
         - Also, this method needs to be callable from the app (or whoever needs data)
         without creating an instance of this class
         """
-        response_data: ResponseData = Config.get_instance().get_request_handler_class().handle_get(url=url)
+        response_data: ResponseData = request_handler.handle_get(url=url)
         if response_data.is_valid() and not Util.is_none_or_empty_df(response_data.df):
             response_data.df.sort_values(by=[model_class.get_id_field()], ascending=True, inplace=True)
             response_data.df.reset_index(drop=True, inplace=True)
@@ -81,19 +80,13 @@ class Persistence:
         return response_data
 
     @staticmethod
-    def get_model_data() -> ResponseData:
-        config: Config = Config.get_instance()
+    def get_model_data(config: ModelConfig) -> ResponseData:
         return Persistence._get_data_impl(url=config.get_model_end_point(EndPoint.Get),
-                                          model_class=config.get_model_class())
+                                          model_class=config.model_class,
+                                          request_handler=config.request_handler_class)
 
     @staticmethod
-    def get_model_audit_data(model_id: int) -> ResponseData:
-        config: Config = Config.get_instance()
+    def get_model_audit_data(config: ModelConfig, model_id: int) -> ResponseData:
         return Persistence._get_data_impl(url=f'{config.get_model_audit_end_point(EndPoint.Get)}{model_id}/',
-                                          model_class=config.get_model_audit_class())
-
-
-if __name__ == '__main__':
-    persistence = Persistence({Operation.New: pd.read_csv('../data/good_movies.csv')})
-    persist_response = persistence.persist()
-    print(persist_response)
+                                          model_class=config.model_audit_class,
+                                          request_handler=config.request_handler_class)

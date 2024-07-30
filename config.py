@@ -1,114 +1,47 @@
-from __future__ import annotations
-
-import importlib
+import copy
 import tomllib
 from pathlib import Path
-from typing import Any, Type, Union, Optional
 
-from base.model import Model
-from base.model_list import ModelList
-from base.request_handler import RequestHandler
-from enums import EndPoint
+from core.model_config import ModelConfig
 
-EXPECTED_CONFIG_FILEPATH = Path(__file__).parent / "app_config.toml"
+PROJECT_ROOT_DIR: Path = Path(__file__).parent
+DEFAULT_CONFIG_FILE: Path = PROJECT_ROOT_DIR / 'config.toml'
 
 
 class Config:
-    """
-    A config class which is expected have to have just one instance across the lifetime of the app
-    So, better to call classmethod @get_instance to access the config
-    """
-    _instance: Optional[Config] = None
-
-    def __init__(self, filepath: Path):
-        """ To maintain a single instance across the lifetime of the app, call get_instance instead """
-
-        with filepath.open("rb") as fp:
-            self._config = tomllib.load(fp)
-
-        Config._instance = self
-
-    def get_value(self, key: str) -> Any:
-        return self._config.get(key, None)
-
-    def get_parsed_config(self) -> dict[str, Any]:
-        return self._config
-
-    def override_config(self, config_values: dict[str, Any]) -> None:
-        self._config.update(config_values)
-
-    def _get_end_point_impl(self, group: str, end_point: EndPoint) -> str:
-        apis_dict: dict[str, Union[str, int]] = self._config["apis"]
-        return f'{apis_dict["host"]}:{apis_dict["port"]}{apis_dict[group][end_point.value]}'
-
-    def get_model_audit_end_point(self, end_point: EndPoint) -> str:
-        return self._get_end_point_impl("movies_audit", end_point)
-
-    def get_model_end_point(self, end_point: EndPoint) -> str:
-        return self._get_end_point_impl("movies", end_point)
-
-    def get_model_class(self) -> Type[Model]:
-        return self._get_class_impl("model", Model)
-
-    def get_model_list_class(self) -> Type[ModelList]:
-        return self._get_class_impl("model_list", ModelList)
-
-    def get_model_audit_class(self) -> Type[Model]:
-        return self._get_class_impl("model_audit", Model)
-
-    def get_request_handler_class(self) -> Type[RequestHandler]:
-        return self._get_class_impl("request", RequestHandler)
-
     @classmethod
-    def reset_instance(cls):
-        cls._instance = None
+    def get_model_configs(cls, parent_config_file_path: Path = DEFAULT_CONFIG_FILE) -> dict[str, ModelConfig]:
 
-    @classmethod
-    def has_instance(cls) -> bool:
-        return cls._instance is not None
+        if not isinstance(parent_config_file_path, Path):
+            raise TypeError(f"'{parent_config_file_path}' [{type(parent_config_file_path)}] is not a Path object")
 
-    @classmethod
-    def get_instance(cls, config_file_path: Optional[Union[Path, str]] = None) -> Config:
-        """
-        It is optional to pass `config_file_path`. if it is `None`:
-         - existing instance will be returned
-         - in case, there is no instance, it will fall back to `EXPECTED_CONFIG_FILEPATH`
-        :param config_file_path: A `Path` or `str` object representing the object
-        :return: `Config` object
-        """
+        if not parent_config_file_path.exists() or not parent_config_file_path.is_file():
+            raise FileNotFoundError(f"'{parent_config_file_path}' file does not exist")
 
-        if config_file_path:  # if path is provided, new instance must always be created
-            # After validation, it can only be an instance of Path class
-            config_file_path: Path = Config._validate_file_path(config_file_path)
+        with parent_config_file_path.open("rb") as config_file:
+            config: dict = tomllib.load(config_file)
 
-            Config.reset_instance()  # if the instance already existed, initializer will raise exception
-            return Config(config_file_path)
+        child_config_directory: Path = PROJECT_ROOT_DIR / config.get("child_config_directory")
+        if not child_config_directory.exists() or not child_config_directory.is_dir():
+            raise NotADirectoryError(f"'{child_config_directory}' is not a directory")
 
-        if cls._instance is None:
-            cls._instance = Config(EXPECTED_CONFIG_FILEPATH)
+        model_configs: dict[str, ModelConfig] = {}
+        for child_config_file in config.get("child_configs"):
+            child_config_full_path = child_config_directory / child_config_file
+            model_config: ModelConfig = ModelConfig(child_config_full_path,
+                                                    copy.deepcopy(config.get("common_config", dict())))
+            model_configs[model_config.name] = model_config
 
-        return cls._instance
+        if not model_configs:
+            raise RuntimeError(f"No child configs found in '{child_config_directory}'")
 
-    @staticmethod
-    def _validate_file_path(filepath: Union[Path, str]) -> Path:
-        """ Validates and returns a valid file path """
+        return model_configs
 
-        if not isinstance(filepath, Path) and not isinstance(filepath, str):
-            raise TypeError('filepath must be a Path object (or string which represents the Path)')
 
-        if isinstance(filepath, str):
-            filepath = Path(filepath)
+def main():
+    configs: dict[str, ModelConfig] = Config.get_model_configs()
+    print(configs)
 
-        if not filepath.is_file():
-            raise FileNotFoundError(f'Config file [{filepath}] does not exist')
 
-        return filepath
-
-    def _get_class_impl(self, group: str, class_type):
-        module = importlib.import_module(self._config[group]["module"])
-        model_class: Type[class_type] = getattr(module, self._config[group]["class"])
-        if issubclass(model_class, class_type):
-            return model_class
-
-        raise TypeError(f'Expected a type (or derived from) [{class_type}] but found: [{model_class}]')
-
+if __name__ == '__main__':
+    main()

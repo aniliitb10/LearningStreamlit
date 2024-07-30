@@ -2,19 +2,20 @@ from itertools import chain
 
 import pandas as pd
 
-from core.session_data_mgr import SessionDataMgr
+from core.model_session_data import ModelSessionData
 from enums import Operation, State
 from util import Util
 
 
 class UpdateCalculator:
 
-    def __init__(self, df: pd.DataFrame):
+    def __init__(self, df: pd.DataFrame, session_data: ModelSessionData):
         self.original_df: pd.DataFrame = df
+        self.session_data: ModelSessionData = session_data
 
     def _get_edited_rows(self) -> pd.DataFrame:
         """ Creates two rows for changes in each row - one with original and one with new data """
-        edited_rows: dict[int, dict] = SessionDataMgr.get_instance().get_editor_data(Operation.Edited)
+        edited_rows: dict[int, dict] = self.session_data.get_editor_data(Operation.Edited)
         edited_row_indices: list[int] = [k for k in edited_rows.keys()]
         impacted_rows: list[dict] = self.original_df.iloc[edited_row_indices].to_dict('records')
 
@@ -31,12 +32,12 @@ class UpdateCalculator:
         return pd.DataFrame(data=diff, columns=new_columns)
 
     def _get_new_rows(self) -> pd.DataFrame:
-        new_rows: list[dict] = SessionDataMgr.get_instance().get_editor_data(Operation.New)
+        new_rows: list[dict] = self.session_data.get_editor_data(Operation.New)
         return pd.DataFrame(data=[row for row in new_rows], columns=self.original_df.columns)
 
     def _get_deleted_rows(self) -> pd.DataFrame:
         """ Although, st returns only the ids, but it makes sense to create the df using those ids"""
-        deleted_rows: list[int] = SessionDataMgr.get_instance().get_editor_data(Operation.Deleted)
+        deleted_rows: list[int] = self.session_data.get_editor_data(Operation.Deleted)
         return self.original_df.iloc[deleted_rows]
 
     def calculate_update(self) -> dict[Operation, pd.DataFrame]:
