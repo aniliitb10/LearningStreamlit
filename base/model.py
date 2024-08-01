@@ -5,10 +5,10 @@ from pydantic import BaseModel
 
 class Model(BaseModel):
 
-    @staticmethod
-    def get_id_field():
+    @classmethod
+    def get_id_field(cls):
         return 'id'
 
-    @staticmethod
-    def get_column_config() -> dict[str, Any]:
+    @classmethod
+    def get_column_config(cls) -> dict[str, Any]:
         return {}
