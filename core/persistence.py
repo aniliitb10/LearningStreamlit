@@ -87,6 +87,7 @@ class Persistence:
 
     @staticmethod
     def get_model_audit_data(config: ModelConfig, model_id: int) -> ResponseData:
-        return Persistence._get_data_impl(url=f'{config.get_model_audit_end_point(EndPoint.Get)}{model_id}/',
+        url = f'{config.get_model_audit_end_point(EndPoint.Get)}{model_id}/'
+        return Persistence._get_data_impl(url=url,
                                           model_class=config.model_audit_class,
                                           request_handler=config.request_handler_class)

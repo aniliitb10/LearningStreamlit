@@ -54,6 +54,7 @@ class UpdateHandler:
         session_data: ModelSessionData = SessionDataMgr.get_instance().get_model_data(self.config.name)
         session_data.clear_data()
         session_data.change_key(ModelSessionDataEnum.EditorData)
+        sl.toast(f'All changes have been discarded', icon=":material/mood_bad:")
 
     def _persist_changes(self):
         """ Expected to be called by 'Apply changes' button """
@@ -68,3 +69,5 @@ class UpdateHandler:
 
         # Not sure if this is really needed
         SessionDataMgr.get_instance().get_model_data(self.config.name).clear_data()
+        sl.toast(f'All changes have been saved', icon=":material/sentiment_satisfied:")
+
