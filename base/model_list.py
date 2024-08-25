@@ -11,5 +11,5 @@ class ModelList(BaseModel):
         raise NotImplementedError("from_df is not implemented")
 
     @classmethod
-    def get_ids(cls, df: pd.DataFrame) -> list[int]:
+    def get_ids(cls, df: pd.DataFrame) -> list:
         raise NotImplementedError("get_ids is not implemented")

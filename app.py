@@ -1,3 +1,5 @@
+from typing import Type
+
 import pandas as pd
 import streamlit as st
 
@@ -31,13 +33,23 @@ def update_table_view(config: ModelConfig):
                    column_config=config.model_class.get_column_config())
 
 
-def update_table_audit_view(config: ModelConfig):
-    movie_id: int = int(st.number_input("Please enter Id", min_value=0, max_value=100_000_000, step=1))
+def update_table_audit_view(config: ModelConfig, id_type: Type[int | str]):
+    if id_type is int:
+        model_id: int = int(st.number_input("Please enter Id", min_value=0, max_value=100_000_000, step=1,
+                                            key=f"{config.name}-number_input"))
 
-    if movie_id <= 0:
-        return
+        if model_id <= 0:
+            return
 
-    data: ResponseData = Persistence.get_model_audit_data(config, model_id=movie_id)
+    elif id_type is str:
+        model_id: str = st.text_input("Please enter Id", key=f"{config.name}-string_input")
+        if not model_id:
+            return
+
+    else:
+        raise TypeError(f"Unsupported id type {id_type}")
+
+    data: ResponseData = Persistence.get_model_audit_data(config, model_id=model_id)
     if not data.is_valid():
         st.error(data.error_msg, icon="🚨")
         return
@@ -49,14 +61,25 @@ def update_table_audit_view(config: ModelConfig):
 
 def main():
     st.set_page_config(layout='wide', initial_sidebar_state="expanded")
-    main_table_data, audit_data = st.tabs(["Full Table Data", "Audit Data"])
+    main_table_data, audit_data, sh_data, sh_audit_data = st.tabs(
+        ["Full Table Data", "Audit Data", "Super Hero Data", "Super Hero Audit Data"])
 
     configs: dict[str, ModelConfig] = Config.get_model_configs()
+
+    # to create app level instance for all models, once created, rest of the app does not need to pass models
+    SessionDataMgr.get_instance(models=[m for m in configs.keys()])
+
     with main_table_data:
         update_table_view(configs["movies"])
 
     with audit_data:
-        update_table_audit_view(configs["movies"])
+        update_table_audit_view(configs["movies"], id_type=int)
+
+    with sh_data:
+        update_table_view(configs["super_hero"])
+
+    with sh_audit_data:
+        update_table_audit_view(configs["super_hero"], id_type=str)
 
 
 if __name__ == '__main__':

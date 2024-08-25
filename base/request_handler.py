@@ -35,11 +35,21 @@ class RequestHandler:
         return cls._wrap(requests.delete(url=url, data=json_data, headers=headers))
 
     @classmethod
+    def _extract_response_data(cls, response: requests.Response) -> Optional[pd.DataFrame]:
+        if response.status_code != requests.codes.ok:
+            return None
+
+        if not response.text:
+            return None
+
+        return pd.read_json(StringIO(response.text))
+
+    @classmethod
     def _wrap(cls, response: requests.Response) -> ResponseData:
         if response.status_code == requests.codes.ok:
 
             # it is okay to have empty response
-            df: pd.DataFrame = pd.read_json(StringIO(response.text)) if response.text else pd.DataFrame()
+            df: Optional[pd.DataFrame] = cls._extract_response_data(response)
             if not Util.is_none_or_empty_df(df):
                 return ResponseData(response.status_code, df=df)
 

@@ -45,8 +45,8 @@ class SessionDataMgr:
             return SessionDataMgr(models, session_data)
 
         if cls._instance is None:
-            # TODO: fix this hard coding, read this from config instead
-            cls._instance = SessionDataMgr(["movies"], st.session_state)
+            # if this call is to get the instance, it has to have valid models
+            cls._instance = SessionDataMgr(models, st.session_state)
 
         return cls._instance
 

@@ -17,14 +17,14 @@ host = "http://localhost"
 port = 8080
 
 [request]
-module = "base.request_handler"
-class = "RequestHandler"
+module = "impl.super_hero_request_handler"
+class = "SuperHeroJsonRequestHandler"
 
 [apis.model]
-get = "/super_hero/"
-put = "/super_hero/"
-post = "/super_hero/"
-delete = "/super_hero/"
+get = "/superhero/"
+put = "/superhero/"
+post = "/superhero/"
+delete = "/superhero/"
 
 [apis.model_audit]
-get = "/super_hero_audit/"
+get = "/superhero/all/"

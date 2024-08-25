@@ -20,7 +20,7 @@ class Util:
         return df is None or df.shape[0] == 0 or df.dropna(how='all').shape[0] == 0
 
     @staticmethod
-    def flash_message(handler, message: str, icon: str = "🚨", seconds: int = 3):
+    def flash_message(handler, message: str, icon: str = "🚨", seconds: int = 5):
         alert = handler(message, icon=icon)
         time.sleep(seconds)
         alert.empty()

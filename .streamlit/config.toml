@@ -16,7 +16,7 @@ gatherUsageStats = false
 headless = true # This will eliminate automatically open browser
 fileWatcherType = "watchdog"
 runOnSave = false
-enableCORS = false
+enableCORS = true
 enableXsrfProtection = false
 enableWebsocketCompression = false
 
