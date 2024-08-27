@@ -1,0 +1,36 @@
+[logger]
+# Level of logging: 'error', 'warning', 'info', or 'debug'.
+# Default: 'info'
+level = "info"
+
+# logger messages will default to `%(asctime)s.%(msecs)03d %(message)s`. See
+# Default: "%(asctime)s %(message)s"
+# messageFormat = '%(asctime)s %(levelname)-8s [%(module)s:%(funcName)s:%(lineno)d] %(message)s'
+messageFormat = '%(asctime)s %(levelname)-8s [%(module)s:%(lineno)d] %(message)s'
+
+[browser]
+gatherUsageStats = false
+
+[server]
+#port=80 # change port number. By default streamlit uses 8501 port
+headless = true # This will eliminate automatically open browser
+fileWatcherType = "watchdog"
+runOnSave = false
+enableCORS = true
+enableXsrfProtection = false
+enableWebsocketCompression = false
+
+# generated using following to test theoretrical working of https
+# openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=localhost"
+# follwing can be used to set up using nginx: https://github.com/codingforentrepreneurs/Pi-Awesome/blob/main/how-tos/Create%20a%20Minimal%20Web%20Application%20with%20Nginx%2C%20Python%2C%20Flask%20%26%20Raspberry%20Pi.md
+#sslCertFile = '/path/to/cert.pem'
+#sslKeyFile = '/path/to/key.pem'
+
+[theme]
+base = "dark"
+
+[runner]
+# Allows you to type a variable or string by itself in a single line of
+# Python code to write it to the app.
+# Default: true
+magicEnabled = false

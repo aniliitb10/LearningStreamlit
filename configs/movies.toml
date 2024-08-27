@@ -27,4 +27,4 @@ post = "/movies/"
 delete = "/movies/"
 
 [apis.model_audit]
-get = "/movie_audit/"
+get = "/movies-audit/"

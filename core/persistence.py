@@ -13,6 +13,11 @@ from util import Util
 
 
 class Persistence:
+    """
+    As the name suggests, it persists changes:
+    - It converts the DataFrame to json objects and calls model specific RequestHandler to persist teh data
+    """
+
     common_headers: dict[str, str] = {'Content-type': 'application/json', 'Accept': 'application/json'}
 
     def __init__(self, config: ModelConfig, changed_data: dict[Operation, pd.DataFrame]):
@@ -59,7 +64,7 @@ class Persistence:
         if Util.is_none_or_empty_df(deleted_data):
             return None  # there wasn't any new data
 
-        deleted_ids: list[int] = self._model_list_class.get_ids(deleted_data)
+        deleted_ids: list = self._model_list_class.get_ids(deleted_data)
         return self._request_handler_class.handle_delete(url=self._config.get_model_end_point(EndPoint.Delete),
                                                          json_data=json.dumps(deleted_ids),
                                                          headers=self.common_headers)
@@ -86,7 +91,8 @@ class Persistence:
                                           request_handler=config.request_handler_class)
 
     @staticmethod
-    def get_model_audit_data(config: ModelConfig, model_id: int) -> ResponseData:
-        return Persistence._get_data_impl(url=f'{config.get_model_audit_end_point(EndPoint.Get)}{model_id}/',
+    def get_model_audit_data(config: ModelConfig, model_id: int | str) -> ResponseData:
+        url = f'{config.get_model_audit_end_point(EndPoint.Get)}{model_id}/'
+        return Persistence._get_data_impl(url=url,
                                           model_class=config.model_audit_class,
                                           request_handler=config.request_handler_class)

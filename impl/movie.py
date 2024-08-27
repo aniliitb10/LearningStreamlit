@@ -41,7 +41,7 @@ class Movie(Model):
 
 class MoviesList(ModelList):
     model_config = ConfigDict(populate_by_name=True)
-    movies: List[Movie] = Field(serialization_alias='movieEntities')
+    movies: list[Movie] = Field(serialization_alias='movieEntities')
 
     @classmethod
     def from_df(cls, df: pd.DataFrame) -> Optional[MoviesList]:
@@ -51,7 +51,7 @@ class MoviesList(ModelList):
         return MoviesList(movies=[Movie.model_validate(m) for m in df.to_dict('records')])
 
     @classmethod
-    def get_ids(cls, df: pd.DataFrame) -> list[int]:
+    def get_ids(cls, df: pd.DataFrame) -> list:
         if Util.is_none_or_empty_df(df):
             return []
 

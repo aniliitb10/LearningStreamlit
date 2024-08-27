@@ -8,6 +8,10 @@ from core.model_session_data import ModelSessionData
 
 
 class SessionDataMgr:
+    """
+    Its only job it to hold the session data for all Models and behave like a singleton!
+    """
+
     _instance: Optional[SessionDataMgr] = None
 
     def __init__(self, models: list[str], session_data: dict[str, Any]):
@@ -45,8 +49,8 @@ class SessionDataMgr:
             return SessionDataMgr(models, session_data)
 
         if cls._instance is None:
-            # TODO: fix this hard coding, read this from config instead
-            cls._instance = SessionDataMgr(["movies"], st.session_state)
+            # if this call is to get the instance, it has to have valid models
+            cls._instance = SessionDataMgr(models, st.session_state)
 
         return cls._instance
 

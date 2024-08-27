@@ -8,6 +8,11 @@ from util import Util
 
 
 class UpdateCalculator:
+    """
+    Used to calculate the edited/deleted and new rows based on:
+     1. the diff with respect to original data frame
+     2. the editor data provided by streamlit in streamlit.session_data
+     """
 
     def __init__(self, df: pd.DataFrame, session_data: ModelSessionData):
         self.original_df: pd.DataFrame = df

@@ -1,0 +1,30 @@
+name = "super_hero"
+
+[model]
+module = "impl.super_hero"
+class = "SuperHero"
+
+[model_list]
+module = "impl.super_hero"
+class = "SuperHeroList"
+
+[model_audit]
+module = "impl.super_hero"
+class = "SuperHeroAudit"
+
+[apis]
+host = "http://localhost"
+port = 8080
+
+[request]
+module = "impl.super_hero_request_handler"
+class = "SuperHeroJsonRequestHandler"
+
+[apis.model]
+get = "/superhero/"
+put = "/superhero/"
+post = "/superhero/"
+delete = "/superhero/"
+
+[apis.model_audit]
+get = "/superhero/all/"

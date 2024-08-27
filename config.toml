@@ -1,2 +1,2 @@
 child_config_directory = "configs"  # with respect to root directory
-child_configs = ["movies.toml"]
+child_configs = ["movies.toml", "super_hero.toml"]

@@ -2,21 +2,38 @@ import copy
 import tomllib
 from pathlib import Path
 
+from streamlit.logger import get_logger
+
 from core.model_config import ModelConfig
+from util import Util
 
 PROJECT_ROOT_DIR: Path = Path(__file__).parent
 DEFAULT_CONFIG_FILE: Path = PROJECT_ROOT_DIR / 'config.toml'
 
+logger = get_logger(__name__.split('.')[-1])
 
-class Config:
+
+class ConfigParser:
+    """
+    The class parses the config and acts as a singleton to get parsed configs
+    By default, the configs are loaded from the config.toml located in the project root directory.
+    if @get_model_configs method is called, it will check if that file is already read
+    -  if yes: then parse the configs will be returned
+    -  if no: then file will be parsed, and then the newly parsed configs will be returned
+
+    There is a helper method supported to reset the read configs
+    """
+    configs: dict[str, ModelConfig] | None = None
+    config_file_path: Path | None = None
+
     @classmethod
     def get_model_configs(cls, parent_config_file_path: Path = DEFAULT_CONFIG_FILE) -> dict[str, ModelConfig]:
+        if cls.configs is not None and cls.config_file_path == parent_config_file_path:
+            return cls.configs
 
-        if not isinstance(parent_config_file_path, Path):
-            raise TypeError(f"'{parent_config_file_path}' [{type(parent_config_file_path)}] is not a Path object")
+        logger.info(f'Reading config from {parent_config_file_path}')
 
-        if not parent_config_file_path.exists() or not parent_config_file_path.is_file():
-            raise FileNotFoundError(f"'{parent_config_file_path}' file does not exist")
+        Util.file_must_exist(parent_config_file_path)
 
         with parent_config_file_path.open("rb") as config_file:
             config: dict = tomllib.load(config_file)
@@ -35,13 +52,11 @@ class Config:
         if not model_configs:
             raise RuntimeError(f"No child configs found in '{child_config_directory}'")
 
+        cls.configs = model_configs
+        cls.config_file_path = parent_config_file_path
         return model_configs
 
-
-def main():
-    configs: dict[str, ModelConfig] = Config.get_model_configs()
-    print(configs)
-
-
-if __name__ == '__main__':
-    main()
+    @classmethod
+    def reset_configs(cls):
+        cls.configs = None
+        cls.config_file_path = None
