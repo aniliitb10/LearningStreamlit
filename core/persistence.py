@@ -13,6 +13,11 @@ from util import Util
 
 
 class Persistence:
+    """
+    As the name suggests, it persists changes:
+    - It converts the DataFrame to json objects and calls model specific RequestHandler to persist teh data
+    """
+
     common_headers: dict[str, str] = {'Content-type': 'application/json', 'Accept': 'application/json'}
 
     def __init__(self, config: ModelConfig, changed_data: dict[Operation, pd.DataFrame]):

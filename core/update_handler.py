@@ -15,7 +15,15 @@ from util import Util
 
 
 class UpdateHandler:
-    """ This must be created specific to a Model"""
+    """
+    Uses UpdateCalculator to calculate the updates and handles the next steps, e.g.:
+     1. Based on the diff, updates the view and gives user the option to save / discard the changes
+     2. Resets the view if changes are discarded
+     3. Persists the changes with the help of Persistence, if changes are saved
+
+     An instance of this class is passed to streamlit as on_change handler, and hence, its __call__ method becomes
+     the entry point
+     """
 
     def __init__(self, df: pd.DataFrame, config: ModelConfig):
         self.df: pd.DataFrame = df
