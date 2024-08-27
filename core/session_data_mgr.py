@@ -8,6 +8,10 @@ from core.model_session_data import ModelSessionData
 
 
 class SessionDataMgr:
+    """
+    Its only job it to hold the session data for all Models and behave like a singleton!
+    """
+
     _instance: Optional[SessionDataMgr] = None
 
     def __init__(self, models: list[str], session_data: dict[str, Any]):

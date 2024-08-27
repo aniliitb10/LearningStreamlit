@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 
 import pandas as pd
 
@@ -24,3 +25,11 @@ class Util:
         alert = handler(message, icon=icon)
         time.sleep(seconds)
         alert.empty()
+
+    @staticmethod
+    def file_must_exist(file_path: Path) -> None:
+        if not isinstance(file_path, Path):
+            raise TypeError(f"'{file_path}' [{type(file_path)}] is not a Path object")
+
+        if not file_path.exists() or not file_path.is_file():
+            raise FileNotFoundError(f"'{file_path}' file does not exist")

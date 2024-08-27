@@ -13,8 +13,8 @@ from enums import EndPoint
 
 class ModelConfig:
     """
-    A config class which is expected have to have just one instance across the lifetime of the app
-    So, better to call classmethod @get_instance to access the config
+    A config class which is expected have to all the config details for a particular model.
+    - if there are multiple models, then there is expected to be multiple instances of this class
     """
 
     def __init__(self, filepath: Path, base_config: dict):

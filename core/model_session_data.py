@@ -12,9 +12,13 @@ class ModelSessionData:
     - Editor data will still be as per the specification provided by streamlit, i.e.
         -- streamlit.session_state will be a dictionary containing the key
 
-    - But, we can utilize the same structure to store model specific data.
+    - But, we can utilize the streamlit.session_state to store model specific data.
     e.g. streamlit.session_state["model"]["model_specific_key"]
         -- And this is what the plan is!
+
+    It is also important to maintain key as well
+    - e.g. there could be multiple editor data, if key is not different, streamlit will raise warning and won't work
+    - if corresponding key is changed, then streamlit reloads the data! It helps if changes are discarded from front end
     """
 
     def __init__(self, model: str, session_data: dict[str, Any]):
