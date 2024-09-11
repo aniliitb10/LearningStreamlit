@@ -9,6 +9,7 @@ Currently, it is a multipage app, allowing to modify data in `Movies` and `Super
 - in fact, in `SuperHeros` data, the key is a composite key, and it is being handled very smoothly by backend in java (a Spring project)
 
 Following is a screenshot of the data screen
+
 ![data_screenshot.png](screenshots/data_screenshot.png)
 
 And following is a screenshot of the audit screen
