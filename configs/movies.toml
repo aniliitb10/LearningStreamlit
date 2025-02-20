@@ -13,18 +13,18 @@ module = "impl.movie"
 class = "MovieAudit"
 
 [apis]
-host = "http://localhost"
-port = 8080
+host = "https://localhost"
+port = 8443
 
 [request]
 module = "base.request_handler"
 class = "RequestHandler"
 
 [apis.model]
-get = "/movies/"
-put = "/movies/"
-post = "/movies/"
-delete = "/movies/"
+get = "/api/movies/"
+put = "/api/movies/"
+post = "/api/movies/"
+delete = "/api/movies/"
 
 [apis.model_audit]
-get = "/movies-audit/"
+get = "/api/movies-audit/"

@@ -29,6 +29,7 @@ class PageUtil:
                 df = data.df
                 model_data.update_data(ModelSessionDataEnum.TableData, df)
 
+        df.reset_index()
         update_handler: UpdateHandler = UpdateHandler(df, config)
         st.data_editor(df, on_change=update_handler, key=model_data.get_key(ModelSessionDataEnum.EditorData),
                        hide_index=True, num_rows="dynamic", use_container_width=True,

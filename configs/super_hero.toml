@@ -13,18 +13,18 @@ module = "impl.super_hero"
 class = "SuperHeroAudit"
 
 [apis]
-host = "http://localhost"
-port = 8080
+host = "https://localhost"
+port = 8443
 
 [request]
 module = "impl.super_hero_request_handler"
 class = "SuperHeroJsonRequestHandler"
 
 [apis.model]
-get = "/superhero/"
-put = "/superhero/"
-post = "/superhero/"
-delete = "/superhero/"
+get = "/api/superhero/"
+put = "/api/superhero/"
+post = "/api/superhero/"
+delete = "/api/superhero/"
 
 [apis.model_audit]
-get = "/superhero/all/"
+get = "/api/superhero/all/"

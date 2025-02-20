@@ -17,7 +17,7 @@ class RequestHandler:
     @classmethod
     def handle_get(cls, url: str, headers: Optional[dict[str, str]] = None) -> ResponseData:
         logger.info(f"Get request: {url}")
-        return cls._wrap(requests.get(url=url, headers=headers))
+        return cls._wrap(requests.get(url=url, headers=headers, verify=False))
 
     @classmethod
     def handle_post(cls, url: str, json_data: str, headers: dict[str, str]) -> ResponseData:
